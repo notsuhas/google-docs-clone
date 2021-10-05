@@ -1,4 +1,8 @@
-# Next.js + Tailwind CSS Example
+# Google Docs Clone using Next.js
+
+This is a Next.js project complete with Rich Text Editor using Draft.js, Authentication using NextAuth, Styling using Material TailwindCSS, and Firebase for Backend Storage.
+
+## Next.js + Tailwind CSS Example
 
 This example shows how to use [Tailwind CSS](https://tailwindcss.com/) [(v2.2)](https://blog.tailwindcss.com/tailwindcss-2-2) with Next.js. It follows the steps outlined in the official [Tailwind docs](https://tailwindcss.com/docs/guides/nextjs).
 
