@@ -6,22 +6,27 @@ import Modal from "@material-tailwind/react/Modal";
 import ModalBody from "@material-tailwind/react/ModalBody";
 import ModalFooter from "@material-tailwind/react/ModalFooter";
 import { useState } from "react";
+import { db } from "../firebase";
+import { getSession, useSession } from "next-auth/client";
 
 function DocumentRow({ id, filename, date }) {
 	const router = useRouter();
+	const [session] = useSession();
 
 	const [showModal, setShowModal] = useState(false);
 
 	const delDocument = () => {
-		db.collection("userDocs").doc(session.user.email).collection("docs").add({
-			filename: input,
-			timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-		});
+		db.collection("userDocs")
+			.doc(session.user.email)
+			.collection("docs")
+			.doc(id)
+			.delete();
 		setShowModal(false);
 	};
 
 	const modal = (
 		<Modal size="sm" active={showModal} toggler={() => setShowModal(false)}>
+			<ModalBody>Are you sure, you want to delete this Document?</ModalBody>
 			<ModalFooter>
 				<Button
 					color="blue"
@@ -33,7 +38,7 @@ function DocumentRow({ id, filename, date }) {
 				<Button
 					color="blue"
 					buttonType="filled"
-					// onClick={delDocument}
+					onClick={delDocument}
 					ripple="light">
 					Delete
 				</Button>
@@ -51,16 +56,16 @@ function DocumentRow({ id, filename, date }) {
 				<p className="flex-grow pl-5 w-10 pr-10 truncate">{filename}</p>
 				<p className="pr-5 text-sm">{date?.toDate().toLocaleDateString()}</p>
 			</div>
-				<Button
-					color="gray"
-					buttonType="outline"
-					rounded={true}
-					iconOnly={true}
-					onClick={() => setShowModal(true)}
-					ripple="dark"
-					className="border-0">
-					<Icon name="more_vert" size="3xl" />
-				</Button>
+			<Button
+				color="gray"
+				buttonType="outline"
+				rounded={true}
+				iconOnly={true}
+				onClick={() => setShowModal(true)}
+				ripple="dark"
+				className="border-0">
+				<Icon name="more_vert" size="3xl" />
+			</Button>
 		</div>
 	);
 }
