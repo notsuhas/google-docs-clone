@@ -31,7 +31,6 @@ export default function Home() {
 			.collection("docs")
 			.orderBy("timestamp", "desc")
 	);
-	// console.log(snapshot.docs.data());
 
 	const createDocument = () => {
 		if (!input) return;
@@ -122,15 +121,16 @@ export default function Home() {
 
 						<Icon name="folder" size="3xl" color="gray" />
 					</div>
+
+					{snapshot?.docs.map((doc) => (
+						<DocumentRow
+							key={doc.id}
+							id={doc.id}
+							filename={doc.data().filename}
+							date={doc.data().timestamp}
+						/>
+					))}
 				</div>
-				{snapshot?.docs.map((doc) => {
-					<DocumentRow
-						key={doc.id}
-						id={doc.id}
-						filename={doc.data().filename}
-						date={doc.data().timestamp}
-					/>;
-				})}
 			</section>
 		</div>
 	);
