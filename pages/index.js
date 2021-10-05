@@ -5,8 +5,77 @@ import Button from "@material-tailwind/react/Button";
 import Icon from "@material-tailwind/react/Icon";
 
 import Image from "next/image";
+import Modal from "@material-tailwind/react/Modal";
+import ModalBody from "@material-tailwind/react/ModalBody";
+import ModalFooter from "@material-tailwind/react/ModalFooter";
+
+import { getSession, useSession } from "next-auth/client";
+import Login from "../components/Login";
+import DocumentRow from "../components/DocumentRow";
+import { useState } from "react";
+import { db } from "../firebase";
+import firebase from "firebase";
+import { useCollectionOnce } from "react-firebase-hooks/firestore";
 
 export default function Home() {
+	const [session] = useSession();
+
+	if (!session) return <Login />;
+
+	const [showModal, setShowModal] = useState(false);
+	const [input, setInput] = useState("");
+	const [snapshot] = useCollectionOnce(
+		db
+			.collection("userDocs")
+			.doc(session.user.email)
+			.collection("docs")
+			.orderBy("timestamp", "desc")
+	);
+	// console.log(snapshot.docs.data());
+
+	const createDocument = () => {
+		if (!input) return;
+
+		db.collection("userDocs").doc(session.user.email).collection("docs").add({
+			filename: input,
+			timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+		});
+
+		setInput("");
+		setShowModal(false);
+	};
+
+	const modal = (
+		<Modal size="sm" active={showModal} toggler={() => setShowModal(false)}>
+			<ModalBody>
+				<input
+					type="text"
+					value={input}
+					onChange={(e) => setInput(e.target.value)}
+					className="outline-none w-full"
+					placeholder="Enter Name of Document..."
+					onKeyDown={(e) => e.key === "Enter" && createDocument()}
+				/>
+			</ModalBody>
+			<ModalFooter>
+				<Button
+					color="blue"
+					buttonType="link"
+					onClick={(e) => setShowModal(false)}
+					ripple="dark">
+					Cancel
+				</Button>
+				<Button
+					color="blue"
+					buttonType="filled"
+					onClick={createDocument}
+					ripple="light">
+					Create
+				</Button>
+			</ModalFooter>
+		</Modal>
+	);
+
 	return (
 		<div>
 			<Head>
@@ -15,6 +84,7 @@ export default function Home() {
 			</Head>
 
 			<Header />
+			{modal}
 
 			<section className="bg-[#f8f9fa] pb-10 px-10">
 				<div className="max-w-3xl mx-auto">
@@ -29,7 +99,9 @@ export default function Home() {
 						</Button>
 					</div>
 					<div>
-						<div className="relative h-52 w-40 border-2 cursor-pointer hover:border-blue-700">
+						<div
+							onClick={() => setShowModal(true)}
+							className="relative h-52 w-40 border-2 cursor-pointer hover:border-blue-700">
 							<Image
 								src="https://ssl.gstatic.com/docs/templates/thumbnails/docs-blank-googlecolors.png"
 								layout="fill"
@@ -51,7 +123,25 @@ export default function Home() {
 						<Icon name="folder" size="3xl" color="gray" />
 					</div>
 				</div>
+				{snapshot?.docs.map((doc) => {
+					<DocumentRow
+						key={doc.id}
+						id={doc.id}
+						filename={doc.data().filename}
+						date={doc.data().timestamp}
+					/>;
+				})}
 			</section>
 		</div>
 	);
+}
+
+export async function getServerSideProps(context) {
+	const session = await getSession(context);
+
+	return {
+		props: {
+			session,
+		},
+	};
 }
