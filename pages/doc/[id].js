@@ -1,6 +1,6 @@
 import Button from "@material-tailwind/react/Button";
 import Icon from "@material-tailwind/react/Icon";
-import { Router, useRouter } from "next/dist/client/router";
+import { useRouter } from "next/dist/client/router";
 import { db } from "../../firebase";
 import { useDocumentOnce } from "react-firebase-hooks/firestore";
 import { getSession, signOut, useSession } from "next-auth/client";
